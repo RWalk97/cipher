@@ -1,0 +1,521 @@
+<html>
+    <style>
+    body {
+      background-color: rgba(31,31,31,100);
+      color: white;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 15px;
+      margin-bottom: 0px;
+
+    }
+    @media screen and (prefers-color-scheme: light) {
+      body {
+        background-color: white;
+        color: black;
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 15px;
+        margin-bottom: 0px;
+
+      }
+    }
+
+    </style>
+    <form action="javascript:void(0);">
+    <input type="text" id="nameT" name="nameT"></input>
+    <select id = "sw1">  
+    <option value="0">Encode</option>
+    <option value="1">Decode</option> 
+    </select> 
+    <select id = "cipherType">  
+    <option value="0">A1Z26</option>
+    <option value="1">Caesar</option>
+    <option value="2">Atbash</option>
+    <option value="3">Vigenere</option>
+    <option value="4">Polybius</option>
+    <option value="5">Morse</option>
+    </select> 
+    <input type="number" id="cShift" value="5"></input>
+    <input type="text" id="tCipher" value="codes" name="tCipher"></input>
+    <input type="text" id="pCipher" value="abcdefghiklmnopqrstuvwxyz" name="pCipher"></input>
+    </form>
+    <button onclick="fixName()">﴾ENTER﴿</button>
+    <p>
+    <text id="out"></text>
+    
+    <script>
+	
+        //Hide nonessential elements
+        document.getElementById("cShift").style.display = "none";
+        document.getElementById("tCipher").style.display = "none";
+        document.getElementById("pCipher").style.display = "none";
+
+        //A1Z26 dictionary
+        const a1z26 = {
+            "a": "1",
+            "b": "2",
+            "c": "3",
+            "d": "4",
+            "e": "5",
+            "f": "6",
+            "g": "7",
+            "h": "8",
+            "i": "9",
+            "j": "10",
+            "k": "11",
+            "l": "12",
+            "m": "13",
+            "n": "14",
+            "o": "15",
+            "p": "16",
+            "q": "17",
+            "r": "18",
+            "s": "19",
+            "t": "20",
+            "u": "21",
+            "v": "22",
+            "w": "23",
+            "x": "24",
+            "y": "25",
+            "z": "26",
+            "1": "a",
+            "2": "b",
+            "3": "c",
+            "4": "d",
+            "5": "e",
+            "6": "f",
+            "7": "g",
+            "8": "h",
+            "9": "i",
+            "10": "j",
+            "11": "k",
+            "12": "l",
+            "13": "m",
+            "14": "n",
+            "15": "o",
+            "16": "p",
+            "17": "q",
+            "18": "r",
+            "19": "s",
+            "20": "t",
+            "21": "u",
+            "22": "v",
+            "23": "w",
+            "24": "x",
+            "25": "y",
+            "26": "z",
+            " ": " ",
+	        " ": " ",
+	        "‚": ",",
+	        ",": "‚"	    
+	    };
+
+        //Atbash dictionary
+        const atList = {
+            "a": "z",
+            "b": "y",
+            "c": "x",
+            "d": "w",
+            "e": "v",
+            "f": "u",
+            "g": "t",
+            "h": "s",
+            "i": "r",
+            "j": "q",
+            "k": "p",
+            "l": "o",
+            "m": "n",
+            "n": "m",
+            "o": "l",
+            "p": "k",
+            "q": "j",
+            "r": "i",
+            "s": "h",
+            "t": "g",
+            "u": "f",
+            "v": "e",
+            "w": "d",
+            "x": "c",
+            "y": "b",
+            "z": "a",
+        };
+
+        //Vigenere dictionary
+        const vList = {
+            "a": "1",
+            "b": "2",
+            "c": "3",
+            "d": "4",
+            "e": "5",
+            "f": "6",
+            "g": "7",
+            "h": "8",
+            "i": "9",
+            "j": "10",
+            "k": "11",
+            "l": "12",
+            "m": "13",
+            "n": "14",
+            "o": "15",
+            "p": "16",
+            "q": "17",
+            "r": "18",
+            "s": "19",
+            "t": "20",
+            "u": "21",
+            "v": "22",
+            "w": "23",
+            "x": "24",
+            "y": "25",
+            "z": "26",
+            "1": "a",
+            "2": "b",
+            "3": "c",
+            "4": "d",
+            "5": "e",
+            "6": "f",
+            "7": "g",
+            "8": "h",
+            "9": "i",
+            "10": "j",
+            "11": "k",
+            "12": "l",
+            "13": "m",
+            "14": "n",
+            "15": "o",
+            "16": "p",
+            "17": "q",
+            "18": "r",
+            "19": "s",
+            "20": "t",
+            "21": "u",
+            "22": "v",
+            "23": "w",
+            "24": "x",
+            "25": "y",
+            "26": "z" 
+        };
+
+        //Morse dictionary
+        const mList = {
+            "a": ".-",
+            "b": "-...",
+            "c": "-.-.",
+            "d": "-..",
+            "e": ".",
+            "f": "..-.",
+            "g": "--.",
+            "h": "....",
+            "i": "..",
+            "j": ".---",
+            "k": "-.-",
+            "l": ".-..",
+            "m": "--",
+            "n": "-.",
+            "o": "---",
+            "p": ".--.",
+            "q": "--.-",
+            "r": ".-.",
+            "s": "...",
+            "t": "-",
+            "u": "..-",
+            "v": "...-",
+            "w": ".--",
+            "x": "-..-",
+            "y": "-.--",
+            "z": "--..",
+            ".-": "a",
+            "-...": "b",
+            "-.-.": "c",
+            "-..": "d",
+            ".": "e",
+            "..-.": "f",
+            "--.": "g",
+            "....": "h",
+            "..": "i",
+            ".---": "j",
+            "-.-": "k",
+            ".-..": "l",
+            "--": "m",
+            "-.": "n",
+            "---": "o",
+            ".--.": "p",
+            "--.-": "q",
+            ".-.": "r",
+            "...": "s",
+            "-": "t",
+            "..-": "u",
+            "...-": "v",
+            ".--": "w",
+            "-..-": "x",
+            "-.--": "y",
+            "--..": "z",
+	        " ": "/",
+	        "/": " ",
+	        "‚": ",",
+	        ",": "‚"
+        };
+
+        //Polybius arrays
+        const polyList = [
+            ["a", "b", "c", "d", "e"],
+            ["f", "g", "h", "i", "k"],
+            ["l", "m", "n", "o", "p"],
+            ["q", "r", "s", "t", "u"],
+            ["v", "w", "x", "y", "z"]
+        ];
+
+        //Polybius list
+        const pList = {
+            "a": "11",
+            "b": "12",
+            "c": "13",
+            "d": "14",
+            "e": "15",
+            "f": "21",
+            "g": "22",
+            "h": "23",
+            "i": "24",
+            "j": "25",
+            "k": "25",
+            "l": "31",
+            "m": "32",
+            "n": "33",
+            "o": "34",
+            "p": "35",
+            "q": "41",
+            "r": "42",
+            "s": "43",
+            "t": "44",
+            "u": "45",
+            "v": "51",
+            "w": "52",
+            "x": "53",
+            "y": "54",
+            "z": "55",
+            "11": "a",
+            "12": "b",
+            "13": "c",
+            "14": "d",
+            "15": "e",
+            "21": "f",
+            "22": "g",
+            "23": "h",
+            "24": "i",
+            "25": "j",
+            "25": "k",
+            "31": "l",
+            "32": "m",
+            "33": "n",
+            "34": "o",
+            "35": "p",
+            "41": "q",
+            "42": "r",
+            "43": "s",
+            "44": "t",
+            "45": "u",
+            "51": "v",
+            "52": "w",
+            "53": "x",
+            "54": "y",
+            "55": "z",
+        };
+
+        //Key listener for ENTER button	
+        var input = document.getElementById('nameT');
+        input.addEventListener('keypress', function(event) {
+            const key = event.key;
+            if (key === 'Enter') {
+                fixName();
+            };
+        });
+    
+        //Root function
+        function fixName() {
+            //Import text and cipher selection
+            nameText = document.getElementById("nameT").value;
+            select = document.getElementById("sw1").value;
+            cipherType = document.getElementById("cipherType").value;
+            //Import values from ciphers
+            cShift = document.getElementById("cShift").value;
+            tCipher = document.getElementById("tCipher").value;
+            pCipher = document.getElementById("pCipher").value;
+            //Determine cipher from dropdown elements
+            if(cipherType == 0){
+                delimCipher("AZ", ", ", ",", 2);
+            }else if(cipherType == 1){
+                shiftCipher("AZ");
+            }else if(cipherType == 2){
+                delimCipher("AT", "", "", 0);
+            }else if(cipherType == 3){
+                shiftCipher("V");
+            }else if(cipherType == 4){
+                delimCipher("P", " ", " ", 1);
+            }else{
+                delimCipher("M", " ", " ", 1);
+            };
+            //Return ciphered text to HTML
+            document.getElementById("out").innerHTML = textName;
+        };
+
+        //For ciphers using deliminators
+        function delimCipher(dL, endAdd, delim, numL){
+            document.getElementById("cShift").style.display = "none";
+            document.getElementById("tCipher").style.display = "none";
+            if(dL == "P"){
+                document.getElementById("pCipher").style.display = "inline";
+            }else{
+                document.getElementById("pCipher").style.display = "none";
+            };
+            nameText = nameText.toLowerCase();
+            pCipher = pCipher.toLowerCase();
+            textName = "";
+            //Determine if alternate polybius cipher is provided
+            if(pCipher != "abcdefghiklmnopqrstuvwxyz"){
+                o = 0;
+                for (n in polyList){
+                    for (m in polyList[n]){
+                        polyList[n][m] = pCipher[o];
+                        yCo = parseInt(n) + 1;
+                        xCo = parseInt(m) + 1;
+                        coord = yCo.toString() + xCo.toString();
+                        pList[coord] = pCipher[o];
+                        pList[pCipher[o]] = coord;
+                        o = o + 1;
+                    };
+                };
+            };
+            //Encode: Parse nameText for each character, run through cipher, append to textName
+            if(select == 0  || dL == "AT"){
+                for (j in nameText){
+                    textName = textName + cipher(nameText.charAt(j), dL) + endAdd;
+                };
+            //Decode: Take first part of nameText until comma, run through cipher, appent to textName and repeat
+            }else{
+                if(dL == "M" || dL == "P"){
+                    nameText = nameText + " ";
+                };
+                while(nameText != ""){
+                    commaAt = nameText.indexOf(delim);
+                    digit = nameText.substring(0, commaAt);
+                    textName = textName + cipher(digit, dL);
+                    nameText = nameText.substring(commaAt + numL);
+                };
+            };
+        };
+
+        //For ciphers that shift letters
+        function shiftCipher(dL){
+            document.getElementById("tCipher").style.display = "inline";
+            document.getElementById("cShift").style.display = "none";
+            document.getElementById("pCipher").style.display = "none";
+            if(dL == "V"){
+                document.getElementById("tCipher").style.display = "inline";
+                document.getElementById("cShift").style.display = "none";
+            }else if(dL == "AZ"){
+                document.getElementById("cShift").style.display = "inline";
+                document.getElementById("tCipher").style.display = "none";
+            }else{
+                document.getElementById("tCipher").style.display = "none";
+                document.getElementById("cShift").style.display = "none";
+	    };
+            textName = "";
+            nameText = nameText.toLowerCase();
+            reps = nameText.length;
+            cipherText = tCipher.repeat(reps);
+            //Convert each character to number, convert cipher values to number, add values together and return back to letter, append to textName
+            for (j in nameText){
+                setNum = cipher(nameText.charAt(j), dL);
+                //Check for special characters
+                if(speCha == 1){
+                    setCha = 1;
+                }else{
+                    setCha = 0;
+                };
+                //Add or subtract values based on cipher
+                if(select == 0 && dL == "V"){
+		    gridNumber = parseInt(setNum) + parseInt(cipher(cipherText[j], "AZ")) - 1;
+                }else if(select == 0 && dL == "AZ"){
+                    gridNumber = parseInt(setNum) + parseInt(cShift);
+                }else if(select == 1 && dL == "V"){
+                    gridNumber = parseInt(setNum) - parseInt(cipher(cipherText[j], "AZ")) + 1;
+                }else if(select == 1 && dL == "AZ"){
+                    gridNumber = parseInt(setNum) - parseInt(cShift);
+                }else{
+                    gridNumber = 1;
+                };
+                //Cycle alphabet around if overlapping
+                if(gridNumber > 26){
+                    gridNumber = gridNumber - 26;
+                }else if(gridNumber < 1){
+                    gridNumber = gridNumber + 26;
+                };
+                //Append character to textName
+                if(setCha != 1){
+                    textName = textName + cipher(gridNumber, dL);
+                }else{
+                    textName = textName + nameText.charAt(j);
+                };
+            };
+
+        };
+
+        //Cipher system, identifies which dictionary to use and runs character through it
+        function cipher(character, dict) {
+            //Identify spaces and space characters
+            if(character == " "){
+                speCha = 1;
+                return spaceCatch(dict);
+            }else if(character == spaceCatch(dict)){
+                speCha = 1;
+                return " ";
+            };
+            //Reference character against dictionary
+            catchSpe = "";
+            if(dict == "AZ"){
+                cha = a1z26[character];
+        	catchSpe = a1z26[cha];
+            }else if(dict == "AT"){
+                cha = atList[character];
+                catchSpe = atList[cha];
+            }else if(dict == "V"){
+                cha = vList[character];
+                catchSpe = vList[cha];
+            }else if(dict == "M"){
+                cha = mList[character];
+                catchSpe = mList[cha];
+            }else if(dict == "P"){
+                cha = pList[character];
+                catchSpe = pList[cha];
+            }else{
+                cha = "";
+            };
+            //Check for unlisted characters
+            if(character == catchSpe) {
+                speCha = 0;
+                return cha;
+            }else{
+                speCha = 1;
+                return character;
+            };
+        };
+
+        //Identify special characters used for spaces in each cipher
+        function spaceCatch(dict){
+            if(dict == "AZ"){
+                return " ";
+            }else if(dict == "AT"){
+                return " ";
+            }else if(dict == "V"){
+                return "/";
+            }else if(dict == "M"){
+                return "/";
+            }else if(dict == "P"){
+                return "/";
+            }else{
+                return "";
+            };
+        };
+
+    console.log("CIPHER tool by Ryan Walker");
+    </script>
+    </html>
